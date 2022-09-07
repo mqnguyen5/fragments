@@ -11,5 +11,8 @@
     "url": "git+https://github.com/mqnguyen5/fragments.git"
   },
   "author": "Minh Quan (Luke) Nguyen",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "prettier": "2.7.1"
+  }
 }
