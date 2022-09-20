@@ -6,7 +6,7 @@ Fragments is a cloud-based microservice for working with small pieces of text, J
 
 1. Clone this repository from [GitHub](https://github.com/mqnguyen5/fragments).
 
-2. Use the package manager [npm](https://www.npmjs.com/) to install fragments.
+2. Use the package manager [npm](https://www.npmjs.com/) to install Fragments.
 
 ```bash
 npm install
