@@ -9,7 +9,7 @@ const {
 
 describe('fragments database methods', () => {
   test('deleteFragment() deletes both metadata and data', async () => {
-    await writeFragment({ ownerId: 'a', id: 'b', fragment: {} });
+    await writeFragment({ ownerId: 'a', id: 'b', type: 'text/plain' });
     await writeFragmentData('a', 'b', { value: 123 });
     await deleteFragment('a', 'b');
     const metadata = await readFragment('a', 'b');
@@ -27,7 +27,7 @@ describe('fragments database methods', () => {
       const metadata = {
         ownerId: 'a',
         id: 'b',
-        fragment: {},
+        type: 'text/plain',
       };
       await writeFragment(metadata);
       const result = await readFragment('a', 'b');
@@ -38,11 +38,11 @@ describe('fragments database methods', () => {
       expect(async () => await writeFragment()).rejects.toThrow();
       expect(async () => await writeFragment({ ownerId: 1 })).rejects.toThrow();
       expect(async () => await writeFragment({ ownerId: 1, id: 1 })).rejects.toThrow();
-      expect(async () => await writeFragment({ id: 'b', fragment: {} })).rejects.toThrow();
+      expect(async () => await writeFragment({ id: 'b', type: 'text/plain' })).rejects.toThrow();
     });
 
     test('readFragment() with incorrect id returns nothing', async () => {
-      await writeFragment({ ownerId: 'a', id: 'b', fragment: {} });
+      await writeFragment({ ownerId: 'a', id: 'b', type: 'text/plain' });
       const result = await readFragment('a', 'c');
       expect(result).toBe(undefined);
     });
@@ -54,33 +54,39 @@ describe('fragments database methods', () => {
     });
 
     test('listFragments() returns fragment objects', async () => {
-      await writeFragment({ ownerId: 'd', id: 'a', fragment: {} });
-      await writeFragment({ ownerId: 'd', id: 'b', fragment: {} });
-      await writeFragment({ ownerId: 'd', id: 'c', fragment: {} });
+      await writeFragment({ ownerId: 'd', id: 'a', type: 'text/plain' });
+      await writeFragment({ ownerId: 'd', id: 'b', type: 'text/plain' });
+      await writeFragment({ ownerId: 'd', id: 'c', type: 'text/plain' });
 
       const results = await listFragments('d', true);
       expect(Array.isArray(results)).toBe(true);
-      expect(results).toEqual(expect.arrayContaining([expect.objectContaining({ ownerId: 'd' })]));
-      expect(results).toEqual(expect.arrayContaining([expect.objectContaining({ id: 'a' })]));
-      expect(results).toEqual(expect.arrayContaining([expect.objectContaining({ id: 'b' })]));
-      expect(results).toEqual(expect.arrayContaining([expect.objectContaining({ id: 'c' })]));
-      expect(results).toEqual(expect.arrayContaining([expect.objectContaining({ fragment: {} })]));
+      results.forEach((fragment) => expect(fragment.ownerId).toEqual('d'));
+      expect(results).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'a' }),
+          expect.objectContaining({ id: 'b' }),
+          expect.objectContaining({ id: 'c' }),
+        ])
+      );
+      results.forEach((fragment) => expect(fragment.type).toEqual('text/plain'));
     });
 
     test('listFragments() returns ids only', async () => {
-      await writeFragment({ ownerId: 'd', id: 'a', fragment: {} });
-      await writeFragment({ ownerId: 'd', id: 'b', fragment: {} });
-      await writeFragment({ ownerId: 'd', id: 'c', fragment: {} });
+      await writeFragment({ ownerId: 'd', id: 'a', type: 'text/plain' });
+      await writeFragment({ ownerId: 'd', id: 'b', type: 'text/plain' });
+      await writeFragment({ ownerId: 'd', id: 'c', type: 'text/plain' });
 
       const results = await listFragments('d');
       expect(Array.isArray(results)).toBe(true);
-      expect(results).toEqual(['a', 'b', 'c']);
+      expect(results).toContain('a');
+      expect(results).toContain('b');
+      expect(results).toContain('c');
     });
 
     test('listFragments() returns empty array', async () => {
-      await writeFragment({ ownerId: 'd', id: 'a', fragment: {} });
-      await writeFragment({ ownerId: 'd', id: 'b', fragment: {} });
-      await writeFragment({ ownerId: 'd', id: 'c', fragment: {} });
+      await writeFragment({ ownerId: 'd', id: 'a', type: 'text/plain' });
+      await writeFragment({ ownerId: 'd', id: 'b', type: 'text/plain' });
+      await writeFragment({ ownerId: 'd', id: 'c', type: 'text/plain' });
 
       const results = await listFragments('e');
       expect(Array.isArray(results)).toBe(true);
