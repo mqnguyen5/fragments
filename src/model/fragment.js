@@ -18,6 +18,9 @@ const validTypes = [
   `image/gif`,
   */
 ];
+const validConversions = {
+  'text/plain': [`text/plain`],
+};
 
 // Functions for working with fragment metadata/data using our DB
 const {
@@ -63,7 +66,11 @@ class Fragment {
    */
   static async byId(ownerId, id) {
     const result = await readFragment(ownerId, id);
-    if (result === undefined) throw new Error('fragment does not exist');
+    if (result === undefined) {
+      const error = new Error('fragment does not exist');
+      error.status = 404;
+      throw error;
+    }
     return result;
   }
 
@@ -100,8 +107,11 @@ class Fragment {
    * @returns Promise
    */
   async setData(data) {
-    if (!data || !Buffer.isBuffer(data))
-      throw new Error(`data must be a Buffer, got ${typeof data}`);
+    if (!data || !Buffer.isBuffer(data)) {
+      const error = new Error(`data must be a Buffer, got ${typeof data}`);
+      error.status = 400;
+      throw error;
+    }
     this.updated = new Date().toISOString();
     this.size = Buffer.byteLength(data);
     return writeFragmentData(this.ownerId, this.id, data);
@@ -130,7 +140,7 @@ class Fragment {
    * @returns {Array<string>} list of supported mime types
    */
   get formats() {
-    return validTypes;
+    return validConversions[this.mimeType];
   }
 
   /**
