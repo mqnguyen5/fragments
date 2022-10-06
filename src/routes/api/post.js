@@ -17,7 +17,9 @@ module.exports = async (req, res, next) => {
       throw error;
     }
 
-    logger.info(`Attempting to create fragment and set fragment's data`);
+    logger.debug(
+      `Attempting to create fragment and set fragment's data using ownerId: ${req.user}, type: ${contentType}, and data: ${data}`
+    );
     const fragment = new Fragment({
       ownerId: req.user,
       type: contentType,
