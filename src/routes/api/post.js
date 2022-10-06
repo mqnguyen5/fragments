@@ -15,19 +15,19 @@ module.exports = async (req, res, next) => {
       const error = new Error(`Media type is not supported, got ${contentType}`);
       error.status = 415;
       throw error;
-    } else {
-      logger.info(`Attempting to create fragment and set fragment's data`);
-      const fragment = new Fragment({
-        ownerId: req.user,
-        type: contentType,
-      });
-      await fragment.save();
-      await fragment.setData(data);
-
-      logger.debug(`Fragment created successfully, got metadata ${JSON.stringify(fragment)}`);
-      res.setHeader('Location', `${process.env.API_URL}/v1/fragments/${fragment.id}`);
-      res.status(201).json(createSuccessResponse({ fragment }));
     }
+
+    logger.info(`Attempting to create fragment and set fragment's data`);
+    const fragment = new Fragment({
+      ownerId: req.user,
+      type: contentType,
+    });
+    await fragment.save();
+    await fragment.setData(data);
+
+    logger.debug(`Fragment created successfully, got metadata ${JSON.stringify(fragment)}`);
+    res.setHeader('Location', `${process.env.API_URL}/v1/fragments/${fragment.id}`);
+    res.status(201).json(createSuccessResponse({ fragment }));
   } catch (err) {
     next(err);
   }
