@@ -9,7 +9,7 @@ module.exports = async (req, res, next) => {
     const data = req.body;
     const contentType = req.headers['content-type'];
 
-    logger.debug(`Validating fragment's media type, got ${contentType}`);
+    logger.debug({ contentType }, `Validating fragment's media type`);
     if (!Buffer.isBuffer(data)) {
       logger.warn(`${contentType} is not supported, throwing 415 error`);
       const error = new Error(`Media type is not supported, got ${contentType}`);
@@ -17,17 +17,17 @@ module.exports = async (req, res, next) => {
       throw error;
     }
 
-    logger.debug(
-      `Attempting to create fragment and set fragment's data using ownerId: ${req.user}, type: ${contentType}, and data: ${data}`
-    );
+    logger.debug({ ownerId: req.user, type: contentType }, 'Attempting to create fragment');
     const fragment = new Fragment({
       ownerId: req.user,
       type: contentType,
     });
     await fragment.save();
+
+    logger.debug({ data }, 'Attempting to set fragment data');
     await fragment.setData(data);
 
-    logger.debug(`Fragment created successfully, got metadata ${JSON.stringify(fragment)}`);
+    logger.debug({ fragment }, 'Fragment created successfully');
     res.setHeader('Location', `${process.env.API_URL}/v1/fragments/${fragment.id}`);
     res.status(201).json(createSuccessResponse({ fragment }));
   } catch (err) {
