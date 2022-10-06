@@ -51,8 +51,7 @@ describe('POST /v1/fragments', () => {
       .set('Content-Type', 'text/plain')
       .send('This is a fragment');
 
-    expect(res.headers).toHaveProperty(
-      'location',
+    expect(res.headers['location']).toEqual(
       `http://localhost:8080/v1/fragments/${res.body.fragment.id}`
     );
   });
