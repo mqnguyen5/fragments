@@ -5,6 +5,7 @@ const contentType = require('content-type');
  * The main entry-point for the v1 version of the fragments API.
  */
 const express = require('express');
+const { byUser, byId } = require('./get');
 
 // Create a router on which to mount our API endpoints
 const router = express.Router();
@@ -24,9 +25,11 @@ const rawBody = () =>
   });
 
 // Define our first route, which will be: GET /v1/fragments
-router.get('/fragments', require('./get'));
+router.get('/fragments', byUser);
 
 // Other routes will go here later on...
+
+router.get('/fragments/:id', byId);
 
 // Use a raw body parser for POST, which will give a `Buffer` Object or `{}` at `req.body`
 router.post('/fragments', rawBody(), require('./post'));
