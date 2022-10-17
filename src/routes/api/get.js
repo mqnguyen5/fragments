@@ -8,9 +8,13 @@ const { createSuccessResponse } = require('../../response');
 /**
  * Get a list of fragments for the current user
  */
-module.exports.byUser = (req, res) => {
-  // TODO: this is just a placeholder to get something working...
-  res.status(200).json(createSuccessResponse({ fragments: [] }));
+module.exports.byUser = async (req, res) => {
+  const expand = req.query.expand && req.query.expand === '1';
+  logger.debug({ ownerId: req.user }, 'Attempting to get fragments');
+  const fragments = await Fragment.byUser(req.user, expand);
+
+  logger.debug({ fragments }, 'Fragments get');
+  res.status(200).json(createSuccessResponse({ fragments }));
 };
 
 /**
