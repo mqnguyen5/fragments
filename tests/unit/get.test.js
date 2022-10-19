@@ -12,9 +12,16 @@ describe('GET /v1/fragments', () => {
   test('incorrect credentials are denied', () =>
     request(app).get('/v1/fragments').auth('invalid@email.com', 'incorrect_password').expect(401));
 
+  test('missing `expand` query value returns 400 error', () =>
+    request(app).get('/v1/fragments/?expand=').auth('user1@email.com', 'password1').expect(400));
+
+  test('incorrect `expand` query value returns 400 error', () =>
+    request(app).get('/v1/fragments/?expand=6').auth('user1@email.com', 'password1').expect(400));
+
   // Using a valid username/password pair should give a success result with a .fragments array
   test('authenticated users get an empty fragments array', async () => {
     const res = await request(app).get('/v1/fragments').auth('user1@email.com', 'password1');
+
     expect(res.statusCode).toBe(200);
     expect(res.body.status).toBe('ok');
     expect(Array.isArray(res.body.fragments)).toBe(true);

@@ -12,13 +12,33 @@ function isValidType(type, fragment) {
 /**
  * Get a list of fragments for the current user
  */
-module.exports.byUser = async (req, res) => {
-  const expand = req.query.expand && req.query.expand === '1';
-  logger.debug({ ownerId: req.user }, 'Attempting to get fragments');
-  const fragments = await Fragment.byUser(req.user, expand);
+module.exports.byUser = async (req, res, next) => {
+  try {
+    let expand = false;
+    const query = req.query;
 
-  logger.debug({ fragments }, 'Fragments get');
-  res.status(200).json(createSuccessResponse({ fragments }));
+    if (Object.keys(query).length > 0) {
+      if (query.expand.length === 0) {
+        const error = new Error('Missing query value');
+        error.status = 400;
+        throw error;
+      }
+      if (query.expand !== '1') {
+        const error = new Error(`Invalid query value, got ${query.expand}`);
+        error.status = 400;
+        throw error;
+      }
+      expand = true;
+    }
+
+    logger.debug({ ownerId: req.user }, 'Attempting to get fragments');
+    const fragments = await Fragment.byUser(req.user, expand);
+
+    logger.debug({ fragments }, 'Fragments get');
+    res.status(200).json(createSuccessResponse({ fragments }));
+  } catch (err) {
+    next(err);
+  }
 };
 
 /**
