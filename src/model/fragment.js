@@ -54,7 +54,7 @@ class Fragment {
    * @param {boolean} expand whether to expand ids to full fragments
    * @returns Promise<Array<Fragment>>
    */
-  static async byUser(ownerId, expand = false) {
+  static byUser(ownerId, expand = false) {
     return listFragments(ownerId, expand);
   }
 

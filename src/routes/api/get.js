@@ -5,6 +5,10 @@ const { Fragment } = require('../../model/fragment');
 const logger = require('../../logger');
 const { createSuccessResponse } = require('../../response');
 
+function isValidType(type, fragment) {
+  return type && !fragment.formats.includes(type);
+}
+
 /**
  * Get a list of fragments for the current user
  */
@@ -28,21 +32,17 @@ module.exports.byId = async (req, res, next) => {
     logger.debug({ ownerId: req.user, id }, 'Attempting to get fragment');
     const fragment = await Fragment.byId(req.user, id);
 
-    if (type && !fragment.formats.includes(type)) {
+    if (isValidType(type, fragment)) {
       const error = new Error(`Extension type is not supported, got ${type}`);
       error.status = 415;
       throw error;
     }
 
-    const rawData = await fragment.getData();
+    logger.debug({ fragment }, "Attempting to get fragment's data");
+    const data = await fragment.getData();
 
-    logger.debug({ extType: type, data: rawData }, 'Attempting to convert data');
-    // Simple data conversion implementation. This will be changed
-    // into more complex one in the future when more types are added
-    const data = type && fragment.formats.includes(type) ? rawData.toString() : rawData;
-
-    logger.debug({ data: data }, 'Conversion successful');
-    res.setHeader('Content-Type', type && fragment.formats.includes(type) ? type : fragment.type);
+    logger.debug({ data }, "Successfully get fragment's data");
+    res.setHeader('Content-Type', isValidType(type, fragment) ? type : fragment.type);
     res.status(200).send(data);
   } catch (err) {
     next(err);
