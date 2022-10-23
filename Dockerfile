@@ -25,7 +25,7 @@ WORKDIR /app
 COPY package*.json /app/
 
 # Install node dependencies defined in package-lock.json
-RUN npm ci --omit=dev
+RUN npm ci --only=production
 
 #######################################################################
 
@@ -52,5 +52,5 @@ CMD ["node", "src/index.js"]
 # We run our service on port 8080
 EXPOSE 8080
 
-# HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-#   CMD wget --no-verbose --tries=1 --spider localhost:8080 || exit 1
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \ 
+  CMD wget --no-verbose --tries=1 --spider localhost:8080 || exit 1
