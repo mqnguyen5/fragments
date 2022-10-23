@@ -175,3 +175,50 @@ describe('GET /v1/fragments/:id', () => {
     expect(res.text).toEqual(data);
   });
 });
+
+describe('GET /v1/fragments/:id/info', () => {
+  test('unauthenticated requests are denied', () =>
+    request(app).get('/v1/fragments/valid_id/info').expect(401));
+
+  test('incorrect credentials are denied', () =>
+    request(app)
+      .get('/v1/fragments/valid_id/info')
+      .auth('invalid@email.com', 'incorrect_password')
+      .expect(401));
+
+  test('incorrect id returns 404 error', () =>
+    request(app)
+      .get('/v1/fragments/incorrect_id/info')
+      .auth('user1@email.com', 'password1')
+      .expect(404));
+
+  test(`authenticated users get the fragment's metadata`, async () => {
+    const {
+      body: {
+        fragment: { id },
+      },
+    } = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/plain')
+      .send('This is a fragment');
+
+    const res = await request(app)
+      .get(`/v1/fragments/${id}/info`)
+      .auth('user1@email.com', 'password1');
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.fragment).toEqual(
+      expect.objectContaining({
+        id: expect.stringMatching(
+          /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
+        ),
+        ownerId: hash('user1@email.com'),
+        created: expect.stringMatching(/^(\d{4}|\d{6})-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$$/),
+        updated: expect.stringMatching(/^(\d{4}|\d{6})-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+        type: expect.any(String),
+        size: expect.any(Number),
+      })
+    );
+  });
+});

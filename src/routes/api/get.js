@@ -68,3 +68,20 @@ module.exports.byId = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+ * Get the current user's fragment metadata
+ */
+module.exports.byIdWithInfo = async (req, res, next) => {
+  try {
+    logger.debug({ ownerId: req.user, id: req.params.id }, 'Attempting to get fragment');
+    const fragment = await Fragment.byId(req.user, req.params.id);
+
+    console.log(fragment);
+
+    logger.debug({ fragment }, "Successfully get fragment's metadata");
+    res.status(200).json(createSuccessResponse({ fragment }));
+  } catch (err) {
+    next(err);
+  }
+};
