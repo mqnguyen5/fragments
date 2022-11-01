@@ -152,7 +152,7 @@ class Fragment {
    */
   static isSupportedType(value) {
     const { type } = contentType.parse(value);
-    return validTypes.includes(type);
+    return validTypes.includes(type) || type.includes('text/');
   }
 }
 
