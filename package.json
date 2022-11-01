@@ -36,6 +36,7 @@
     "helmet": "^6.0.0",
     "http-auth": "^4.1.9",
     "http-auth-passport": "^1.0.6",
+    "markdown-it": "^13.0.1",
     "mime-types": "^2.1.35",
     "passport": "^0.6.0",
     "passport-http-bearer": "^1.0.1",
