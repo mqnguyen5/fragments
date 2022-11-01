@@ -6,12 +6,11 @@ const contentType = require('content-type');
 
 const validTypes = [
   `text/plain`,
-  /*
-   Currently, only text/plain is supported. Others will be added later.
-
   `text/markdown`,
   `text/html`,
   `application/json`,
+  /*
+   Currently, only text and JSON are supported. Others will be added later.
   `image/png`,
   `image/jpeg`,
   `image/webp`,
@@ -20,6 +19,9 @@ const validTypes = [
 ];
 const validConversions = {
   'text/plain': [`text/plain`],
+  'text/markdown': [`text/markdown`, `text/html`, `text/plain`],
+  'text/html': [`text/html`, `text/plain`],
+  'application/json': [`application/json`, `text/plain`],
 };
 
 // Functions for working with fragment metadata/data using our DB
