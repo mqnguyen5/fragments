@@ -9,16 +9,49 @@ describe('POST /v1/fragments', () => {
   test('incorrect credentials are denied', () =>
     request(app).post('/v1/fragments').auth('invalid@email.com', 'incorrect_password').expect(401));
 
-  test('authenticated users can create a plain text fragment', async () => {
-    const res = await request(app)
+  test('authenticated users can create a plain text fragment', () =>
+    request(app)
       .post('/v1/fragments')
       .auth('user1@email.com', 'password1')
       .set('Content-Type', 'text/plain')
-      .send('This is a fragment');
+      .send('This is a fragment')
+      .expect(201)
+      .expect((res) => {
+        res.body.status === 'ok';
+      }));
 
-    expect(res.statusCode).toBe(201);
-    expect(res.body.status).toBe('ok');
-  });
+  test('authenticated users can create a Markdown fragment', () =>
+    request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/markdown')
+      .send('# This is a fragment')
+      .expect(201)
+      .expect((res) => {
+        res.body.status === 'ok';
+      }));
+
+  test('authenticated users can create an HTML fragment', () =>
+    request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/html')
+      .send('<h1>This is a fragment</h1>')
+      .expect(201)
+      .expect((res) => {
+        res.body.status === 'ok';
+      }));
+
+  test('authenticated users can create a JSON fragment', () =>
+    request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'application/json')
+      .send({ title: 'Hi', items: [1, 2, 3], message: 'This is a fragments' })
+      .expect(201)
+      .expect((res) => {
+        res.body.status === 'ok';
+      }));
 
   test(`response fragment's metadata includes id, ownerId, created, updated, type, and size`, async () => {
     const contentType = 'text/plain';

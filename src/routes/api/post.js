@@ -9,10 +9,10 @@ module.exports = async (req, res, next) => {
     const data = req.body;
     const contentType = req.headers['content-type'];
 
-    logger.debug({ contentType }, `Validating fragment's media type`);
+    logger.debug({ type: contentType }, `Validating fragment's Content-Type`);
     if (!Buffer.isBuffer(data)) {
-      logger.warn(`${contentType} is not supported, throwing 415 error`);
-      const error = new Error(`Media type is not supported, got ${contentType}`);
+      logger.warn({ type: contentType }, `Content-Type not supported, throwing 415 error`);
+      const error = new Error(`Content-Type not supported, got ${contentType}`);
       error.status = 415;
       throw error;
     }
@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
     });
     await fragment.save();
 
-    logger.debug({ data }, 'Attempting to set fragment data');
+    logger.debug({ data: data.toString() }, 'Attempting to set fragment data');
     await fragment.setData(data);
 
     logger.debug({ fragment }, 'Fragment created successfully');
