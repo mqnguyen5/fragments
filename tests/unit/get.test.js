@@ -1,5 +1,7 @@
 const request = require('supertest');
 const mime = require('mime-types');
+const contentType = require('content-type');
+const md = require('markdown-it')();
 
 const app = require('../../src/app');
 const hash = require('../../src/hash');
@@ -114,7 +116,12 @@ describe('GET /v1/fragments/:id', () => {
       .send('This is a fragment');
 
     await request(app)
-      .get(`/v1/fragments/${res.body.fragment.id}.docx`)
+      .get(`/v1/fragments/${res.body.fragment.id}.null`)
+      .auth('user1@email.com', 'password1')
+      .expect(415);
+
+    await request(app)
+      .get(`/v1/fragments/${res.body.fragment.id}.gz`)
       .auth('user1@email.com', 'password1')
       .expect(415);
   });
@@ -123,8 +130,13 @@ describe('GET /v1/fragments/:id', () => {
     const res = await request(app)
       .post('/v1/fragments')
       .auth('user1@email.com', 'password1')
-      .set('Content-Type', 'text/plain')
-      .send('This is a fragment');
+      .set('Content-Type', 'text/html')
+      .send('<h1>This is a fragment</h1>');
+
+    await request(app)
+      .get(`/v1/fragments/${res.body.fragment.id}.md`)
+      .auth('user1@email.com', 'password1')
+      .expect(415);
 
     await request(app)
       .get(`/v1/fragments/${res.body.fragment.id}.png`)
@@ -132,47 +144,142 @@ describe('GET /v1/fragments/:id', () => {
       .expect(415);
   });
 
-  test(`authenticated users get the raw fragment's data`, async () => {
-    const data = 'This is a fragment';
+  describe(`authenticated users get the raw fragment's data`, () => {
+    test('works with plain text fragments', async () => {
+      const data = 'This is a fragment';
 
-    const {
-      body: {
-        fragment: { id, type },
-      },
-    } = await request(app)
-      .post('/v1/fragments')
-      .auth('user1@email.com', 'password1')
-      .set('Content-Type', 'text/plain')
-      .send(data);
+      const {
+        body: {
+          fragment: { id, type },
+        },
+      } = await request(app)
+        .post('/v1/fragments')
+        .auth('user1@email.com', 'password1')
+        .set('Content-Type', 'text/plain; charset=utf-8')
+        .send(data);
 
-    const res = await request(app).get(`/v1/fragments/${id}`).auth('user1@email.com', 'password1');
+      const res = await request(app)
+        .get(`/v1/fragments/${id}`)
+        .auth('user1@email.com', 'password1');
 
-    expect(res.statusCode).toBe(200);
-    expect(res.headers['content-type'].startsWith(type)).toEqual(true);
-    expect(res.text).toEqual(data);
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-type']).toEqual(type);
+      expect(res.text).toEqual(data);
+    });
+
+    test('works with HTML fragments', async () => {
+      const data = '<h1>This is a fragment</h1>';
+
+      const {
+        body: {
+          fragment: { id, type },
+        },
+      } = await request(app)
+        .post('/v1/fragments')
+        .auth('user1@email.com', 'password1')
+        .set('Content-Type', 'text/html; charset=utf-8')
+        .send(data);
+
+      const res = await request(app)
+        .get(`/v1/fragments/${id}`)
+        .auth('user1@email.com', 'password1');
+
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-type']).toEqual(type);
+      expect(res.text).toEqual(data);
+    });
+
+    test('works with Markdown fragments', async () => {
+      const data = '# This is a fragment';
+
+      const {
+        body: {
+          fragment: { id, type },
+        },
+      } = await request(app)
+        .post('/v1/fragments')
+        .auth('user1@email.com', 'password1')
+        .set('Content-Type', 'text/markdown; charset=utf-8')
+        .send(data);
+
+      const res = await request(app)
+        .get(`/v1/fragments/${id}`)
+        .auth('user1@email.com', 'password1');
+
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-type']).toEqual(type);
+      expect(res.text).toEqual(data);
+    });
+
+    test('works with JSON fragments', async () => {
+      const data = { title: 'Hi', message: 'This is a fragment' };
+
+      const {
+        body: {
+          fragment: { id, type },
+        },
+      } = await request(app)
+        .post('/v1/fragments')
+        .auth('user1@email.com', 'password1')
+        .set('Content-Type', 'application/json; charset=utf-8')
+        .send(data);
+
+      const res = await request(app)
+        .get(`/v1/fragments/${id}`)
+        .auth('user1@email.com', 'password1');
+
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-type']).toEqual(type);
+      expect(res.text).toEqual(JSON.stringify(data));
+    });
   });
 
-  test(`valid extension returns the corresponding Content-Type and raw fragment's data`, async () => {
-    const data = 'This is a fragment';
-    const ext = '.txt';
+  describe(`valid extension returns the corresponding Content-Type and raw fragment's data`, () => {
+    test('works when converting from JSON to text', async () => {
+      const data = { title: 'Hi', message: 'This is a fragment' };
+      const ext = '.txt';
 
-    const {
-      body: {
-        fragment: { id },
-      },
-    } = await request(app)
-      .post('/v1/fragments')
-      .auth('user1@email.com', 'password1')
-      .set('Content-Type', 'text/plain')
-      .send(data);
+      const {
+        body: {
+          fragment: { id },
+        },
+      } = await request(app)
+        .post('/v1/fragments')
+        .auth('user1@email.com', 'password1')
+        .set('Content-Type', 'application/json')
+        .send(data);
 
-    const res = await request(app)
-      .get(`/v1/fragments/${id}${ext}`)
-      .auth('user1@email.com', 'password1');
+      const res = await request(app)
+        .get(`/v1/fragments/${id}${ext}`)
+        .auth('user1@email.com', 'password1');
 
-    expect(res.headers['content-type'].startsWith(mime.lookup(ext))).toEqual(true);
-    expect(res.statusCode).toBe(200);
-    expect(res.text).toEqual(data);
+      expect(contentType.parse(res.headers['content-type']).type).toEqual(mime.lookup(ext));
+      expect(res.statusCode).toBe(200);
+      expect(res.text).toEqual(JSON.stringify(data));
+    });
+
+    test('works when converting from Markdown to HTML', async () => {
+      const data = '# This is a fragment';
+      const ext = '.html';
+
+      const {
+        body: {
+          fragment: { id },
+        },
+      } = await request(app)
+        .post('/v1/fragments')
+        .auth('user1@email.com', 'password1')
+        .set('Content-Type', 'text/markdown')
+        .send(data);
+
+      const res = await request(app)
+        .get(`/v1/fragments/${id}${ext}`)
+        .auth('user1@email.com', 'password1');
+
+      expect(contentType.parse(res.headers['content-type']).type).toEqual(mime.lookup(ext));
+      expect(res.statusCode).toBe(200);
+      expect(res.text).toEqual(md.render(data));
+    });
   });
 });
 
@@ -192,33 +299,71 @@ describe('GET /v1/fragments/:id/info', () => {
       .auth('user1@email.com', 'password1')
       .expect(404));
 
-  test(`authenticated users get the fragment's metadata`, async () => {
-    const {
-      body: {
-        fragment: { id },
-      },
-    } = await request(app)
-      .post('/v1/fragments')
-      .auth('user1@email.com', 'password1')
-      .set('Content-Type', 'text/plain')
-      .send('This is a fragment');
+  describe(`authenticated users get the fragment's metadata`, () => {
+    test('works with any text fragment', async () => {
+      const type = 'text/plain';
+      const data = 'This is a fragment';
 
-    const res = await request(app)
-      .get(`/v1/fragments/${id}/info`)
-      .auth('user1@email.com', 'password1');
+      const {
+        body: {
+          fragment: { id },
+        },
+      } = await request(app)
+        .post('/v1/fragments')
+        .auth('user1@email.com', 'password1')
+        .set('Content-Type', type)
+        .send(data);
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.fragment).toEqual(
-      expect.objectContaining({
-        id: expect.stringMatching(
-          /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
-        ),
-        ownerId: hash('user1@email.com'),
-        created: expect.stringMatching(/^(\d{4}|\d{6})-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$$/),
-        updated: expect.stringMatching(/^(\d{4}|\d{6})-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
-        type: expect.any(String),
-        size: expect.any(Number),
-      })
-    );
+      const res = await request(app)
+        .get(`/v1/fragments/${id}/info`)
+        .auth('user1@email.com', 'password1');
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.fragment).toEqual(
+        expect.objectContaining({
+          id: expect.stringMatching(
+            /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
+          ),
+          ownerId: hash('user1@email.com'),
+          created: expect.stringMatching(/^(\d{4}|\d{6})-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$$/),
+          updated: expect.stringMatching(/^(\d{4}|\d{6})-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+          type: expect.stringContaining(type),
+          size: Buffer.byteLength(data),
+        })
+      );
+    });
+
+    test('works with JSON fragments', async () => {
+      const type = 'application/json';
+      const data = { title: 'Hi', message: 'This is a fragment' };
+
+      const {
+        body: {
+          fragment: { id },
+        },
+      } = await request(app)
+        .post('/v1/fragments')
+        .auth('user1@email.com', 'password1')
+        .set('Content-Type', type)
+        .send(data);
+
+      const res = await request(app)
+        .get(`/v1/fragments/${id}/info`)
+        .auth('user1@email.com', 'password1');
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.fragment).toEqual(
+        expect.objectContaining({
+          id: expect.stringMatching(
+            /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
+          ),
+          ownerId: hash('user1@email.com'),
+          created: expect.stringMatching(/^(\d{4}|\d{6})-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$$/),
+          updated: expect.stringMatching(/^(\d{4}|\d{6})-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+          type: expect.stringContaining(type),
+          size: Buffer.byteLength(JSON.stringify(data)),
+        })
+      );
+    });
   });
 });
