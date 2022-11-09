@@ -116,7 +116,7 @@ describe('GET /v1/fragments/:id', () => {
       .send('This is a fragment');
 
     await request(app)
-      .get(`/v1/fragments/${res.body.fragment.id}.null`)
+      .get(`/v1/fragments/${res.body.fragment.id}.`)
       .auth('user1@email.com', 'password1')
       .expect(415);
 
