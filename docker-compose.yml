@@ -1,0 +1,57 @@
+# docker-compose.yml
+
+services:
+  # Fragments microservice API server
+  fragments:
+    # Use a proper init process (tini)
+    init: true
+    # Build the Docker Image using the Dockerfile
+    # and current directory as the build context
+    build: .
+    # Environment variables to use
+    environment:
+      # Our API will be running on http://localhost:8080
+      - API_URL=http://localhost:8080
+      # Use Basic Auth (for running tests, CI)
+      - HTPASSWD_FILE=tests/.htpasswd
+      # Use the LOG_LEVEL set in the host environment, or default to info
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - AWS_REGION=us-east-1
+      # Use the LocalStack endpoint vs. AWS for S3 AWS SDK clients.
+      # NOTE: we use Docker's internal network to the localstack container
+      - AWS_S3_ENDPOINT_URL=http://localstack:4566
+      # Use the DynamoDB local endpoint vs. AWS for DynamoDB AWS SDK clients.
+      - AWS_DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
+      # This S3 bucket and DynamoDB table need to get created first, see
+      # local-aws-setup.sh. We'll default to 'fragments' as the name, unless
+      # something else is defined in the env.
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-fragments}
+      - AWS_DYNAMODB_TABLE_NAME=${AWS_DYNAMODB_TABLE_NAME:-fragments}
+    # Ports to publish
+    ports:
+      - '8080:8080'
+
+  # DynamoDB Local, see: https://hub.docker.com/r/amazon/dynamodb-local
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    ports:
+      # Default port is 8000
+      - '8000:8000'
+    # Run the database in memory, see:
+    # https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html
+    command: ['-jar', 'DynamoDBLocal.jar', '-inMemory']
+
+  # LocalStack for S3, see https://docs.localstack.cloud/get-started/#docker-compose
+  # Interact via awscli-local, see https://docs.localstack.cloud/integrations/aws-cli/#installation
+  localstack:
+    # https://hub.docker.com/r/localstack/localstack
+    image: localstack/localstack
+    ports:
+      - '4566:4566'
+    environment:
+      # See https://docs.localstack.cloud/localstack/configuration/ and
+      # https://hub.docker.com/r/localstack/localstack for config details.
+      # We only want to run S3
+      - SERVICES=s3
+      # We're always working in us-east-1
+      - DEFAULT_REGION=us-east-1
