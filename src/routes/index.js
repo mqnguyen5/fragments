@@ -1,4 +1,5 @@
 const express = require('express');
+const { hostname } = require('os');
 
 // Our authorization middleware
 const { authenticate } = require('../authorization');
@@ -29,6 +30,8 @@ router.get('/', (req, res) => {
       // Use your own GitHub URL for this...
       githubUrl: 'https://github.com/mqnguyen5/fragments',
       version,
+      // Include the hostname in the response
+      hostname: hostname(),
     })
   );
 });
