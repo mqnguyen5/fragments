@@ -42,18 +42,24 @@ function getResponseContentType(fragment, ext) {
 }
 
 async function getResponseData(fragment, type, conversion) {
-  const { type: parsedType } = contentType.parse(type);
-  const data = await fragment.getData();
+  try {
+    const { type: parsedType } = contentType.parse(type);
+    const data = await fragment.getData();
 
-  // Check if we need to convert the data
-  if (!conversion || parsedType === 'text/plain') {
-    // If not, return the data as it is
-    return data;
-  }
-  // Otherwise, if the data can be converted,
-  // check the type and perform the correct conversion
-  if (parsedType === 'text/html') {
-    return Buffer.from(md.render(data.toString()));
+    // Check if we need to convert the data
+    if (!conversion || parsedType === 'text/plain') {
+      // If not, return the data as it is
+      return data;
+    }
+    // Otherwise, if the data can be converted,
+    // check the type and perform the correct conversion
+    if (parsedType === 'text/html') {
+      return Buffer.from(md.render(data.toString()));
+    }
+  } catch (err) {
+    const error = new Error(err);
+    error.status = 404;
+    throw error;
   }
 }
 
