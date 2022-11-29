@@ -117,6 +117,11 @@ async function deleteFragment(ownerId, id) {
   const command = new DeleteObjectCommand(params);
 
   try {
+    Promise.all([
+      // Delete metadata
+      metadata.del(ownerId, id),
+    ]);
+
     // Use our client to send the command
     await s3Client.send(command);
   } catch (err) {
