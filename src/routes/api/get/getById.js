@@ -1,11 +1,9 @@
 const path = require('node:path');
 const contentType = require('content-type');
 const mime = require('mime-types');
-const md = require('markdown-it')();
 
-const { Fragment } = require('../../model/fragment');
-const logger = require('../../logger');
-const { createSuccessResponse } = require('../../response');
+const { Fragment } = require('../../../model/fragment');
+const logger = require('../../../logger');
 
 function getResponseContentType(fragment, ext) {
   if (ext.length > 0) {
@@ -53,9 +51,7 @@ async function getResponseData(fragment, type, conversion) {
     }
     // Otherwise, if the data can be converted,
     // check the type and perform the correct conversion
-    if (parsedType === 'text/html') {
-      return Buffer.from(md.render(data.toString()));
-    }
+    return fragment.convertBuffer(parsedType, data);
   } catch (err) {
     const error = new Error(err);
     error.status = 404;
@@ -64,43 +60,9 @@ async function getResponseData(fragment, type, conversion) {
 }
 
 /**
- * Get a list of fragments for the current user
- */
-module.exports.byUser = async (req, res, next) => {
-  try {
-    const query = req.query;
-    let expand = false;
-
-    if (Object.keys(query).length > 0) {
-      if (query.expand.length === 0) {
-        logger.warn('Missing query value, throwing 400 error');
-        const error = new Error('Missing query value');
-        error.status = 400;
-        throw error;
-      }
-      if (query.expand !== '1') {
-        logger.warn({ query: query.expand }, 'Invalid query value, throwing 400 error');
-        const error = new Error(`Invalid query value, got ${query.expand}`);
-        error.status = 400;
-        throw error;
-      }
-      expand = true;
-    }
-
-    logger.debug({ ownerId: req.user }, 'Attempting to get fragments');
-    const fragments = await Fragment.byUser(req.user, expand);
-
-    logger.debug({ fragments }, 'Fragments get');
-    res.status(200).json(createSuccessResponse({ fragments }));
-  } catch (err) {
-    next(err);
-  }
-};
-
-/**
  * Get the current user's fragment data
  */
-module.exports.byId = async (req, res, next) => {
+module.exports = async (req, res, next) => {
   try {
     const { name: id, ext } = path.parse(req.params.id);
 
@@ -117,21 +79,6 @@ module.exports.byId = async (req, res, next) => {
 
     res.setHeader('Content-Type', type);
     res.status(200).send(data);
-  } catch (err) {
-    next(err);
-  }
-};
-
-/**
- * Get the current user's fragment metadata
- */
-module.exports.byIdWithInfo = async (req, res, next) => {
-  try {
-    logger.debug({ ownerId: req.user, id: req.params.id }, 'Attempting to get fragment');
-    const fragment = await Fragment.byId(req.user, req.params.id);
-
-    logger.debug({ fragment }, "Successfully get fragment's metadata");
-    res.status(200).json(createSuccessResponse({ fragment }));
   } catch (err) {
     next(err);
   }

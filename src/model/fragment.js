@@ -3,6 +3,7 @@
 const { randomUUID } = require('crypto');
 // Use https://www.npmjs.com/package/content-type to create/parse Content-Type headers
 const contentType = require('content-type');
+const md = require('markdown-it')();
 
 const validTypes = [
   `text/plain`,
@@ -67,13 +68,20 @@ class Fragment {
    * @returns Promise<Fragment>
    */
   static async byId(ownerId, id) {
-    const result = await readFragment(ownerId, id);
-    if (result === undefined) {
+    const data = await readFragment(ownerId, id);
+    if (data === undefined) {
       const error = new Error('fragment does not exist');
       error.status = 404;
       throw error;
     }
-    return result;
+    return new Fragment({
+      id: data.id,
+      ownerId: data.ownerId,
+      created: data.created,
+      updated: data.updated,
+      type: data.type,
+      size: data.size,
+    });
   }
 
   /**
@@ -93,6 +101,12 @@ class Fragment {
   save() {
     this.updated = new Date().toISOString();
     return writeFragment(this);
+  }
+
+  convertBuffer(type, buffer) {
+    if (type === 'text/html') {
+      return Buffer.from(md.render(buffer.toString()));
+    }
   }
 
   /**
