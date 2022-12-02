@@ -22,10 +22,11 @@ module.exports = async (req, res, next) => {
       ownerId: req.user,
       type: contentType,
     });
-    await fragment.save();
 
     logger.debug({ data: data.toString() }, 'Attempting to set fragment data');
     await fragment.setData(data);
+
+    await fragment.save();
 
     logger.debug({ fragment }, 'Fragment created successfully');
     res.setHeader('Location', `${process.env.API_URL}/v1/fragments/${fragment.id}`);
