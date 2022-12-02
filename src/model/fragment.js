@@ -74,14 +74,7 @@ class Fragment {
       error.status = 404;
       throw error;
     }
-    return new Fragment({
-      id: data.id,
-      ownerId: data.ownerId,
-      created: data.created,
-      updated: data.updated,
-      type: data.type,
-      size: data.size,
-    });
+    return new Fragment(data);
   }
 
   /**
