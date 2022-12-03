@@ -45,6 +45,10 @@
         {
           "name": "AWS_S3_BUCKET_NAME",
           "value": "mqnguyen5-fragments"
+        },
+        {
+          "name": "AWS_DYNAMODB_TABLE_NAME",
+          "value": "fragments"
         }
       ],
       "resourceRequirements": null,
