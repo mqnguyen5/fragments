@@ -10,19 +10,20 @@ const validTypes = [
   `text/markdown`,
   `text/html`,
   `application/json`,
-  /*
-   Currently, only text and JSON are supported. Others will be added later.
   `image/png`,
   `image/jpeg`,
   `image/webp`,
   `image/gif`,
-  */
 ];
 const validConversions = {
   'text/plain': [`text/plain`],
   'text/markdown': [`text/markdown`, `text/html`, `text/plain`],
   'text/html': [`text/html`, `text/plain`],
   'application/json': [`application/json`, `text/plain`],
+  'image/png': [`image/png`, `image/jpeg`, `image/webp`, `image/gif`],
+  'image/jpeg': [`image/png`, `image/jpeg`, `image/webp`, `image/gif`],
+  'image/webp': [`image/png`, `image/jpeg`, `image/webp`, `image/gif`],
+  'image/gif': [`image/png`, `image/jpeg`, `image/webp`, `image/gif`],
 };
 
 // Functions for working with fragment metadata/data using our DB
