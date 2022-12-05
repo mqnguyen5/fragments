@@ -1,5 +1,4 @@
 const request = require('supertest');
-const mime = require('mime-types');
 const contentType = require('content-type');
 const md = require('markdown-it')();
 
@@ -253,7 +252,7 @@ describe('GET /v1/fragments/:id', () => {
         .get(`/v1/fragments/${id}${ext}`)
         .auth('user1@email.com', 'password1');
 
-      expect(contentType.parse(res.headers['content-type']).type).toEqual(mime.lookup(ext));
+      expect(contentType.parse(res.headers['content-type']).type).toEqual('text/plain');
       expect(res.statusCode).toBe(200);
       expect(res.text).toEqual(JSON.stringify(data));
     });
@@ -276,7 +275,7 @@ describe('GET /v1/fragments/:id', () => {
         .get(`/v1/fragments/${id}${ext}`)
         .auth('user1@email.com', 'password1');
 
-      expect(contentType.parse(res.headers['content-type']).type).toEqual(mime.lookup(ext));
+      expect(contentType.parse(res.headers['content-type']).type).toEqual('text/html');
       expect(res.statusCode).toBe(200);
       expect(res.text).toEqual(md.render(data));
     });
