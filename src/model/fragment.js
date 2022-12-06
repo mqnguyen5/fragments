@@ -69,13 +69,13 @@ class Fragment {
    * @returns Promise<Fragment>
    */
   static async byId(ownerId, id) {
-    const data = await readFragment(ownerId, id);
-    if (data === undefined) {
+    const fragment = await readFragment(ownerId, id);
+    if (fragment === undefined) {
       const error = new Error('fragment does not exist');
       error.status = 404;
       throw error;
     }
-    return new Fragment(data);
+    return new Fragment(fragment);
   }
 
   /**
@@ -84,7 +84,13 @@ class Fragment {
    * @param {string} id fragment's id
    * @returns Promise
    */
-  static delete(ownerId, id) {
+  static async delete(ownerId, id) {
+    const fragment = await readFragment(ownerId, id);
+    if (fragment === undefined) {
+      const error = new Error('fragment does not exist');
+      error.status = 404;
+      throw error;
+    }
     return deleteFragment(ownerId, id);
   }
 
