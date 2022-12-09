@@ -25,11 +25,10 @@ WORKDIR /app
 COPY package*.json /app/
 
 # Install node dependencies defined in package-lock.json
-RUN npm ci --only=production
+RUN npm ci --only=production && npm install --platform=linux --arch=x64 --libc=musl sharp@0.31.2
 # Install sharp binaries for Alpine Linux 
 # https://sharp.pixelplumbing.com/install#common-problems
 # https://github.com/humphd/cloud-computing-for-programmers-fall-2022/discussions/463
-RUN npm install --platform=linux --arch=x64 --libc=musl sharp
 
 #######################################################################
 
