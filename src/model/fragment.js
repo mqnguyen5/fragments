@@ -3,7 +3,9 @@
 const { randomUUID } = require('crypto');
 // Use https://www.npmjs.com/package/content-type to create/parse Content-Type headers
 const contentType = require('content-type');
+const mime = require('mime-types');
 const md = require('markdown-it')();
+const sharp = require('sharp');
 
 const validTypes = [
   `text/plain`,
@@ -103,12 +105,20 @@ class Fragment {
     return writeFragment(this);
   }
 
-  convertBuffer(type, buffer) {
+  async convertBuffer(type, buffer) {
     if (type === 'text/html') {
       return Buffer.from(md.render(buffer.toString()));
     }
-  }
 
+    try {
+      const imgFormat = mime.extension(type);
+      return await sharp(buffer).toFormat(imgFormat).toBuffer();
+    } catch (err) {
+      const error = new Error(err);
+      error.status = 415;
+      throw err;
+    }
+  }
   /**
    * Gets the fragment's data from the database
    * @returns Promise<Buffer>
@@ -128,8 +138,8 @@ class Fragment {
       error.status = 400;
       throw error;
     }
-    this.updated = new Date().toISOString();
     this.size = Buffer.byteLength(data);
+    await this.save();
     return writeFragmentData(this.ownerId, this.id, data);
   }
 

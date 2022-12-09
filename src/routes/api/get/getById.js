@@ -75,7 +75,7 @@ module.exports = async (req, res, next) => {
 
     logger.debug({ fragment, type, conversion }, "Attempting to get fragment's data");
     const data = await getResponseData(fragment, type, conversion);
-    logger.info({ data: data.toString() }, 'Data get');
+    logger.info({ data }, 'Data get');
 
     res.setHeader('Content-Type', type);
     res.status(200).send(data);

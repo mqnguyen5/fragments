@@ -23,7 +23,7 @@ module.exports = async (req, res, next) => {
       type: contentType,
     });
 
-    logger.debug({ data: data.toString() }, 'Attempting to set fragment data');
+    logger.debug({ data }, 'Attempting to set fragment data');
     await fragment.setData(data);
 
     await fragment.save();
