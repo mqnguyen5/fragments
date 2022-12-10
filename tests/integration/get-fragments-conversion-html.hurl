@@ -1,4 +1,4 @@
-# tests/integration/post-fragments-conversion-html.hurl
+# tests/integration/get-fragments-conversion-html.hurl
 POST http://localhost:8080/v1/fragments
 Content-Type: text/markdown
 [BasicAuth]

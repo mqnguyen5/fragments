@@ -1,13 +1,21 @@
-# tests/integration/post-fragments-conversion-png.hurl
+# tests/integration/get-fragments-conversion-png.hurl
 POST http://localhost:8080/v1/fragments
-Content-Type: image/png
+Content-Type: image/webp
 [BasicAuth]
 user1@email.com:password1
-file,sample_data/icon.png;
+file,sample_data/icon.webp;
 
 HTTP/1.1 201
 [Captures]
 url: header "Location"
+
+# Converting to PNG
+GET {{url}}.png
+[BasicAuth]
+user1@email.com:password1
+
+HTTP/1.1 200
+Content-Type: image/png
 
 # Converting to JPEG
 GET {{url}}.jpg
@@ -16,14 +24,6 @@ user1@email.com:password1
 
 HTTP/1.1 200
 Content-Type: image/jpeg
-
-# Converting to WEBP
-GET {{url}}.webp
-[BasicAuth]
-user1@email.com:password1
-
-HTTP/1.1 200
-Content-Type: image/webp
 
 # Converting to GIF
 GET {{url}}.gif

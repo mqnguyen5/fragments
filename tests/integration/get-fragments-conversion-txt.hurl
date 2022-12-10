@@ -1,4 +1,4 @@
-# tests/integration/post-fragments-conversion-txt.hurl
+# tests/integration/get-fragments-conversion-txt.hurl
 # Converting JSON to plain text
 POST http://localhost:8080/v1/fragments
 Content-Type: application/json

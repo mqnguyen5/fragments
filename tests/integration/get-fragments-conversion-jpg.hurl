@@ -1,4 +1,4 @@
-# tests/integration/post-fragments-conversion-png.hurl
+# tests/integration/get-fragments-conversion-png.hurl
 POST http://localhost:8080/v1/fragments
 Content-Type: image/jpeg
 [BasicAuth]

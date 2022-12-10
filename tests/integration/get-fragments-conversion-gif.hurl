@@ -1,9 +1,9 @@
-# tests/integration/post-fragments-conversion-png.hurl
+# tests/integration/get-fragments-conversion-png.hurl
 POST http://localhost:8080/v1/fragments
-Content-Type: image/webp
+Content-Type: image/gif
 [BasicAuth]
 user1@email.com:password1
-file,sample_data/icon.webp;
+file,sample_data/icon.gif;
 
 HTTP/1.1 201
 [Captures]
@@ -25,10 +25,10 @@ user1@email.com:password1
 HTTP/1.1 200
 Content-Type: image/jpeg
 
-# Converting to GIF
-GET {{url}}.gif
+# Converting to WEBP
+GET {{url}}.webp
 [BasicAuth]
 user1@email.com:password1
 
 HTTP/1.1 200
-Content-Type: image/gif
+Content-Type: image/webp
