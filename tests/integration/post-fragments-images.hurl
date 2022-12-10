@@ -4,7 +4,7 @@ POST http://localhost:8080/v1/fragments
 Content-Type: image/png
 [BasicAuth]
 user1@email.com:password1
-file,sample_data/icon.png;
+file,sample_data/icon-excel.png;
 
 HTTP/1.1 201
 [Asserts]
@@ -26,14 +26,14 @@ user1@email.com:password1
 HTTP/1.1 200
 Content-Type: image/png
 Content-Length: 2356
-file,sample_data/icon.png;
+file,sample_data/icon-excel.png;
 
 # Creating JPEG image
 POST http://localhost:8080/v1/fragments
 Content-Type: image/jpeg
 [BasicAuth]
 user1@email.com:password1
-file,sample_data/icon.jpg;
+file,sample_data/icon-excel.jpg;
 
 HTTP/1.1 201
 [Asserts]
@@ -55,14 +55,14 @@ user1@email.com:password1
 HTTP/1.1 200
 Content-Type: image/jpeg
 Content-Length: 2614
-file,sample_data/icon.jpg;
+file,sample_data/icon-excel.jpg;
 
 # Creating WEBP image
 POST http://localhost:8080/v1/fragments
 Content-Type: image/webp
 [BasicAuth]
 user1@email.com:password1
-file,sample_data/icon.webp;
+file,sample_data/icon-excel.webp;
 
 HTTP/1.1 201
 [Asserts]
@@ -84,14 +84,14 @@ user1@email.com:password1
 HTTP/1.1 200
 Content-Type: image/webp
 Content-Length: 1400
-file,sample_data/icon.webp;
+file,sample_data/icon-excel.webp;
 
 # Creating GIF image
 POST http://localhost:8080/v1/fragments
 Content-Type: image/gif
 [BasicAuth]
 user1@email.com:password1
-file,sample_data/icon.gif;
+file,sample_data/icon-excel.gif;
 
 HTTP/1.1 201
 [Asserts]
@@ -113,4 +113,4 @@ user1@email.com:password1
 HTTP/1.1 200
 Content-Type: image/gif
 Content-Length: 2356
-file,sample_data/icon.gif;
+file,sample_data/icon-excel.gif;

@@ -3,7 +3,7 @@ POST http://localhost:8080/v1/fragments
 Content-Type: image/webp
 [BasicAuth]
 user1@email.com:password1
-file,sample_data/icon.webp;
+file,sample_data/icon-excel.webp;
 
 HTTP/1.1 201
 [Captures]

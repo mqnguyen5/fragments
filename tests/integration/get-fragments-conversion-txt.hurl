@@ -69,7 +69,7 @@ POST http://localhost:8080/v1/fragments
 Content-Type: image/png
 [BasicAuth]
 user1@email.com:password1
-file,sample_data/icon.png;
+file,sample_data/icon-excel.png;
 
 HTTP/1.1 201
 [Captures]
