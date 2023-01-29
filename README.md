@@ -2,6 +2,10 @@
 
 Fragments is a cloud-based microservice for working with small pieces of text, JSON data, and images.
 
+## How it works
+
+[Demo](https://youtu.be/v1e_bBYpIck)
+
 ## Installation
 
 1. Clone this repository from [GitHub](https://github.com/mqnguyen5/fragments).
